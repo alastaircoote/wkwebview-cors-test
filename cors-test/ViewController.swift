@@ -19,8 +19,10 @@ class ViewController: UIViewController, WKURLSchemeHandler {
         
         let config = WKWebViewConfiguration()
         config.setURLSchemeHandler(self, forURLScheme: "test")
+        config.setValue(true, forKey: "allowUniversalAccessFromFileURLs")
         
         let wkview = WKWebView(frame: self.view.frame, configuration: config)
+//        WKContext
         self.view.addSubview(wkview)
         wkview.load(URLRequest(url: URL(string: "test://host-one/index.html")!))
     }
@@ -38,7 +40,7 @@ class ViewController: UIViewController, WKURLSchemeHandler {
                     <body>
                         <h1>Hello.</h1>
                         <script>
-                            fetch('//host-two/index.html')
+                            fetch('//host-two/test.json')
                             .then(res => res.json())
                             .then(json => {
                                 document.body.innerHTML += "<h3>Success!</h3>";
@@ -56,10 +58,11 @@ class ViewController: UIViewController, WKURLSchemeHandler {
             urlSchemeTask.didFinish()
         } else if urlSchemeTask.request.url?.absoluteString == "test://host-two/test.json" {
             urlSchemeTask.didReceive(HTTPURLResponse(url: urlSchemeTask.request.url!, statusCode: 200, httpVersion: nil, headerFields: [
-                "Content-Type": "application.json"
+                "Content-Type": "application.json",
+                "Access-Control-Allow-Origin": "*"
                 ])!)
             
-            let json = "{'test': true}"
+            let json = "{\"test\": true}"
             urlSchemeTask.didReceive(json.data(using: .utf8)!)
             urlSchemeTask.didFinish()
         } else {
